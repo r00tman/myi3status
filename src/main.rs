@@ -71,7 +71,7 @@ impl MpdStatus {
                     .get(&"Artist".to_owned())
                     .unwrap_or(&"no artist".to_owned()),
                 song.title
-                    .unwrap_or("no title".to_owned()),
+                    .unwrap_or_else(|| "no title".to_owned()),
                 match conn.status() {
                     Ok(status) => format_time(
                         match status.state {
