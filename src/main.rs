@@ -56,16 +56,12 @@ impl MpdStatus {
         Ok(self.conn.as_mut().unwrap())
     }
 
-    fn get_text(&mut self) -> String {
-        let conn = self.get_or_connect();
-        if let Err(err) = conn {
-            return format!("{}", err);
-        }
-        let conn = conn.unwrap();
+    fn get_text(&mut self) -> Result<String, mpd::error::Error> {
+        let conn = self.get_or_connect()?;
 
         use mpd::status::State::*;
-        match conn.currentsong() {
-            Ok(Some(song)) => format!(
+        match conn.currentsong()? {
+            Some(song) => Ok(format!(
                 "{} - {} ({})",
                 song.tags
                     .get(&"Artist".to_owned())
@@ -80,9 +76,8 @@ impl MpdStatus {
                             Pause => "paused",
                         }, status.time),
                     Err(_) => "unknown".to_owned(),
-                }),
-            Ok(None) => "no song".to_owned(),
-            Err(err) => format!("{}", err)
+                })),
+            None => Ok("no song".to_owned()),
         }
     }
 }
@@ -113,13 +108,15 @@ fn main() {
             let v: Result<Value, _> = serde_json::from_str(&line);
 
             if let Ok(Value::Array(mut vec)) = v {
-                let mpd = json!({
-                    "name": "mpd",
-                    "instance": "local",
-                    "markup": "none",
-                    "full_text": "M: ".to_owned()+&mpd.get_text(),
-                });
-                vec.insert(0, mpd);
+                if let Ok(mpd_text) = mpd.get_text() {
+                    let mpd = json!({
+                        "name": "mpd",
+                        "instance": "local",
+                        "markup": "none",
+                        "full_text": "M: ".to_owned()+&mpd_text,
+                    });
+                    vec.insert(0, mpd);
+                }
 
                 let cont = if is_cont {","} else {""};
                 println!("{}{}", cont, Value::Array(vec));
