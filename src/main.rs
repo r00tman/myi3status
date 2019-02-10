@@ -31,12 +31,24 @@ impl MpdStatus {
             return format!("{}", err);
         }
         let conn = conn.unwrap();
+
+        use mpd::status::State::*;
         match conn.currentsong() {
             Ok(Some(song)) => format!(
-                "{} - {}",
-                song.tags.get(&"Artist".to_owned())
+                "{} - {} ({})",
+                song.tags
+                    .get(&"Artist".to_owned())
                     .unwrap_or(&"no artist".to_owned()),
-                song.title.as_ref().unwrap_or(&"no title".to_owned())),
+                song.title
+                    .unwrap_or("no title".to_owned()),
+                match conn.status() {
+                    Ok(status) => match status.state {
+                        Stop => "stopped",
+                        Play => "playing",
+                        Pause => "paused",
+                    },
+                    Err(_) => "unknown",
+                }),
             Ok(None) => "no song".to_owned(),
             Err(err) => format!("{}", err)
         }
