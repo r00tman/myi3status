@@ -24,7 +24,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "my_i3status"
+name = "myi3status"
 version = "0.1.0"
 dependencies = [
  "mpd 0.0.12 (registry+https://github.com/rust-lang/crates.io-index)",
