@@ -24,4 +24,16 @@ bar {
 }
 ```
 
+Then, you need to set `output-format` in your i3status config depending on what bar you use (e.g., i3bar, lemonbar, etc). For example:
+
+```
+general {
+        output_format = "i3bar"
+        colors = true
+        interval = 10
+        color_good = "#91bc30"
+        color_bad = "#f85858"
+}
+```
+
 Finally, reload i3: `i3-msg reload`
